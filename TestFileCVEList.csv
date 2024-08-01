@@ -1,5 +1,9 @@
-﻿Team,Severity,CVE,Project
+﻿team,severity,cve,project
 Myteam,High,CVE-2023-35116,https://github.com/cb2538/testrepo
 Myteam,High,CVE-2023-4775,https://github.com/cb2538/testrepo
 Myteam,High,CVE-2023-3500,https://github.com/cb2538/testrepo1
 Myteam,High,CVE-2023-001,https://github.com/cb2538/testrepo1
+Myteam,High,CVE-2023-35116,https://github.com/cb2538/testrepo3
+Myteam,High,CVE-2023-4775,https://github.com/cb2538/testrepo4
+Myteam,High,CVE-2023-35116,https://github.com/cb2538/testrepo
+Myteam,High,CVE-2023-4775,https://github.com/cb2538/testrepo
