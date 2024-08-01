@@ -13,19 +13,22 @@ def extract_project_name(project_url):
         print(f"Error extracting project name: {e}")
         return "Unknown Project"
 
-def get_cve_details(api_key, cve_ids, projects, input_file):
+def get_cve_details(api_key, cve_entries, input_file):
     # Headers to include the API key
     headers = {'apiKey': api_key}
     
     # Counters and storage for summary
-    total_cves = len(cve_ids)
+    total_cves = len(cve_entries)
     successful_cves = 0
     failed_cves = []
 
     # List to store CVE data for CSV export
     cve_data_list = []
 
-    for i, cve_id in enumerate(cve_ids):
+    for entry in cve_entries:
+        cve_id = entry['cve']
+        project_url = entry['project']
+
         # API endpoint with the CVE number dynamically inserted
         url = f"https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={cve_id}"
 
@@ -57,7 +60,7 @@ def get_cve_details(api_key, cve_ids, projects, input_file):
                     description = descriptions[0]['value'] if descriptions else "No description available"
 
                     # Get the project name for the current CVE
-                    project_name = extract_project_name(projects[i])
+                    project_name = extract_project_name(project_url)
 
                     # Add CVE data to list for CSV export
                     cve_data_list.append({
@@ -146,22 +149,22 @@ def get_cve_details(api_key, cve_ids, projects, input_file):
     print("\n" + "="*40 + "\n")
 
 def read_cve_ids_from_csv(file_path):
-    """Read CVE IDs and project URLs from a CSV file."""
+    """Read cve IDs and project URLs from a CSV file."""
     try:
         df = pd.read_csv(file_path)
-        # Extract CVE IDs and Project URLs
-        cve_ids = df['CVE'].dropna().unique().tolist()
-        projects = df['Project'].dropna().tolist()
-        return cve_ids, projects
+        # Remove duplicates where both cve and project are the same
+        unique_entries = df.drop_duplicates(subset=['cve', 'project'])
+        cve_entries = unique_entries[['cve', 'project']].dropna().to_dict('records')
+        return cve_entries
     except FileNotFoundError:
         print(f"File not found: {file_path}")
-        return [], []
+        return []
     except pd.errors.EmptyDataError:
         print("No data found in the CSV file.")
-        return [], []
+        return []
     except KeyError:
         print("The CSV file does not contain the required columns.")
-        return [], []
+        return []
 
 # Example usage
 if __name__ == "__main__":
@@ -172,9 +175,9 @@ if __name__ == "__main__":
         print("Error: API key not found. Please set the NVD_API_KEY environment variable.")
     else:
         input_file = 'TestFileCVEList.csv'  # Updated input file name
-        cve_ids, projects = read_cve_ids_from_csv(input_file)
+        cve_entries = read_cve_ids_from_csv(input_file)
         
-        if cve_ids:
-            get_cve_details(api_key, cve_ids, projects, input_file)
+        if cve_entries:
+            get_cve_details(api_key, cve_entries, input_file)
         else:
             print("No CVE IDs to process.")
